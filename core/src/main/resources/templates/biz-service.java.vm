@@ -1,0 +1,137 @@
+package ${package.Entity};
+
+import ${package.Parent}.service.${entitySimple}Service;
+import ${package.Parent}.converter.${entitySimple}Converter;
+import ${package.Parent}.model.dto.${entitySimple}Dto;
+import ${package.Parent}.model.entity.${entitySimple}Entity;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+@Transactional(rollbackFor = Exception.class)
+@AllArgsConstructor
+public class ${entity} {
+
+    private final ${entitySimple}Service ${entitySimpleName}Service;
+    private final ${entitySimple}Converter ${entitySimpleName}Converter;
+
+
+    /**
+    * 查询分页数据
+    *
+    * @param pageNum 页码
+    * @param pageSize 每页数量
+    * @param ${entitySimpleName}Dto 查询参数
+    * @return 分页数据
+    */
+    public IPage<${entitySimple}Dto> page(Integer pageNum, Integer pageSize, ${entitySimple}Dto ${entitySimpleName}Dto) {
+        Page<${entitySimple}Entity> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<${entitySimple}Entity> query = Wrappers.lambdaQuery();
+        //根据请求参数自行添加
+        #foreach($field in ${table.fields})
+        query.eq(null != ${entitySimpleName}Dto.get${field.capitalName}(), ${entitySimple}Entity::get${field.capitalName}, ${entitySimpleName}Dto.get${field.capitalName}());
+        #end
+        query.orderByDesc(${entitySimple}Entity::getId);
+
+        page = ${entitySimpleName}Service.page(page, query);
+        return page.convert(${entitySimpleName}Converter::entityToDto);
+    }
+
+
+    /**
+     * 自定义查询分页数据, 按需注入其他属性
+     *
+     * @param pageNum    页码
+     * @param pageSize   每页数量
+     * @param ${entitySimpleName}Dto 查询参数
+     * @return 分页数据
+     */
+    public IPage<${entitySimple}Dto> customPage(Integer pageNum, Integer pageSize, ${entitySimple}Dto ${entitySimpleName}Dto) {
+        IPage<${entitySimple}Entity> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<${entitySimple}Entity> query = Wrappers.lambdaQuery();
+        //根据请求参数自行添加
+        #foreach($field in ${table.fields})
+        query.eq(null != ${entitySimpleName}Dto.get${field.capitalName}(), ${entitySimple}Entity::get${field.capitalName}, ${entitySimpleName}Dto.get${field.capitalName}());
+        #end
+        query.orderByDesc(${entitySimple}Entity::getId);
+
+        page = ${entitySimpleName}Service.page(page, query);
+        // 创建DTO分页对象，并设置总页数、每页大小和总记录数
+        IPage<${entitySimple}Dto> resultPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        // 将实体列表转换为DTO列表，并为每个DTO设置特有属性
+        resultPage.setRecords(page.getRecords().stream().map(aiModelEntity -> {
+            ${entitySimple}Dto dto = ${entitySimpleName}Converter.entityToDto(aiModelEntity);
+            //TODO 其他属性注入
+            return dto;
+        }).collect(Collectors.toList()));
+
+        return resultPage;
+    }
+
+    /**
+    * 根据id获取数据
+    *
+    * @param id id
+    * @return 数据
+    */
+    public ${entitySimple}Dto getById(${pkPropertyType} id) {
+        ${entitySimple}Entity entity = ${entitySimpleName}Service.getById(id);
+        return ${entitySimpleName}Converter.entityToDto(entity);
+    }
+
+    /**
+    * 保存数据
+    *
+    * @param ${entitySimpleName}Dto 数据
+    * @return 保存后的数据
+    */
+    public ${entitySimple}Dto save(${entitySimple}Dto ${entitySimpleName}Dto) {
+        //TODO 必要的参数校验
+        ${entitySimple}Entity entity = ${entitySimpleName}Converter.dtoToEntity(${entitySimpleName}Dto);
+        ${entitySimpleName}Service.save(entity);
+        return ${entitySimpleName}Converter.entityToDto(entity);
+    }
+
+
+    /**
+     * 修改数据
+     *
+     * @param ${entitySimpleName}Dto 数据
+     * @return 修改后的数据
+     */
+    public ${entitySimple}Dto updateById(${entitySimple}Dto ${entitySimpleName}Dto) {
+        ${entitySimple}Entity entity = ${entitySimpleName}Service.getById(${entitySimpleName}Dto.getId());
+        if (null == entity) {
+            throw new RuntimeException("数据不存在");
+        }
+        ${entitySimple}Entity updateEntity = ${entitySimpleName}Converter.dtoToEntity(${entitySimpleName}Dto);
+        ${entitySimpleName}Service.updateById(updateEntity);
+        return ${entitySimpleName}Converter.entityToDto(updateEntity);
+    }
+
+    /**
+     * 删除数据
+     *
+     * @param id id
+     * @return 删除结果
+     */
+    public boolean removeById(${pkPropertyType} id) {
+        ${entitySimple}Entity entity = ${entitySimpleName}Service.getById(id);
+        if (null == entity) {
+            throw new RuntimeException("数据不存在");
+        }
+        return ${entitySimpleName}Service.removeById(id);
+    }
+
+
+
+}

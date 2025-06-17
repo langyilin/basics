@@ -1,0 +1,19 @@
+package ${package.Entity};
+
+import ${package.Parent}.model.entity.${entitySimple}Entity;
+import ${package.Parent}.model.dto.${entitySimple}Dto;
+import org.mapstruct.Mapper;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface ${entity} {
+
+    ${entitySimple}Dto entityToDto(${entitySimple}Entity entity);
+
+    ${entitySimple}Entity dtoToEntity(${entitySimple}Dto dto);
+
+    List<${entitySimple}Dto> entityToDto(List<${entitySimple}Entity> entities);
+
+    List<${entitySimple}Entity> dtoToEntity(List<${entitySimple}Dto> dto);
+}
