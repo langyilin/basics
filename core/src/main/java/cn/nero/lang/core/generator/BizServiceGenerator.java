@@ -10,7 +10,7 @@ public class BizServiceGenerator {
 
     public static void main(String[] args) {
         String tableString = "all";
-        tableString = "ai_model";
+        tableString = "user_container_info";
         List<String> tables = AllGenerator.getTables(tableString);
         BizServiceGenerator.generate(tables);
     }
@@ -41,18 +41,16 @@ public class BizServiceGenerator {
                     //禁止controller代码生成
                     builder.controllerBuilder().disable().build();
                 })
-                .injectionConfig(builder -> {
-                    builder.beforeOutputFile((tableInfo, object) -> {
-                        String simple = tableInfo.getEntityName().replace("BizService", "");
-                        object.put("entitySimple", simple);
-                        object.put("entitySimpleName", simple.substring(0, 1).toLowerCase() + simple.substring(1));
-                        tableInfo.getFields().forEach(field -> {
-                            if (field.isKeyFlag()) {
-                                object.put("pkPropertyType", field.getPropertyType());
-                            }
-                        });
+                .injectionConfig(builder -> builder.beforeOutputFile((tableInfo, object) -> {
+                    String simple = tableInfo.getEntityName().replace("BizService", "");
+                    object.put("entitySimple", simple);
+                    object.put("entitySimpleName", simple.substring(0, 1).toLowerCase() + simple.substring(1));
+                    tableInfo.getFields().forEach(field -> {
+                        if (field.isKeyFlag()) {
+                            object.put("pkPropertyType", field.getPropertyType());
+                        }
                     });
-                })
+                }))
                 .execute();
     }
 

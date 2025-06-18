@@ -10,7 +10,7 @@ public class ConverterGenerator {
 
     public static void main(String[] args) {
         String tableString = "all";
-        tableString = "ai_model";
+        tableString = "user_container_info";
         List<String> tables = AllGenerator.getTables(tableString);
         ConverterGenerator.generate(tables);
     }
@@ -41,12 +41,10 @@ public class ConverterGenerator {
                     //禁止controller代码生成
                     builder.controllerBuilder().disable().build();
                 })
-                .injectionConfig(builder -> {
-                    builder.beforeOutputFile((tableInfo, object) -> {
-                        String simple = tableInfo.getEntityName().replace("Converter", "");
-                        object.put("entitySimple", simple);
-                    });
-                })
+                .injectionConfig(builder -> builder.beforeOutputFile((tableInfo, object) -> {
+                    String simple = tableInfo.getEntityName().replace("Converter", "");
+                    object.put("entitySimple", simple);
+                }))
                 .execute();
     }
 }

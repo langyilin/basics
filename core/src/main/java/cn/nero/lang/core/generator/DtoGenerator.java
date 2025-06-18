@@ -2,15 +2,15 @@ package cn.nero.lang.core.generator;
 
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 
-import static cn.nero.lang.core.generator.AllGenerator.*;
-
 import java.util.List;
+
+import static cn.nero.lang.core.generator.AllGenerator.*;
 
 public class DtoGenerator {
 
     public static void main(String[] args) {
         String tableString = "all";
-        tableString = "ai_model";
+        tableString = "user_container_info";
         List<String> tables = AllGenerator.getTables(tableString);
         DtoGenerator.generate(tables);
     }
@@ -44,13 +44,17 @@ public class DtoGenerator {
                     //禁止controller代码生成
                     builder.controllerBuilder().disable().build();
                 })
-                .injectionConfig(builder -> builder.beforeOutputFile((tableInfo, object) ->
-                        tableInfo.getFields().forEach(field ->
-                                field.setComment(field.getComment().replaceAll("\n", " ")
-                                        .replaceAll("\r", " ")
-                                        .replaceAll("\t", " ")
-                                        .replaceAll("\"", "'")
-                                        .replaceAll("\\\\", ",")))))
+                .injectionConfig(builder -> builder.beforeOutputFile((tableInfo, object) -> tableInfo.getFields().forEach(field -> {
+                    field.setComment(field.getComment().replaceAll("\n", " ")
+                            .replaceAll("\r", " ")
+                            .replaceAll("\t", " ")
+                            .replaceAll("\"", "'")
+                            .replaceAll("\\\\", ","));
+                    //是否引入时间format类
+                    if (field.getPropertyType().equals("LocalDateTime") || field.getPropertyType().equals("Date")) {
+                        object.put("dateformat", true);
+                    }
+                })))
                 .execute();
     }
 }
